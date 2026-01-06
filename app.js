@@ -13,8 +13,12 @@ async function main() {
 }
 
 main()
-  .then(() => { console.log("Connected to MongoDB"); })
-  .catch((err) => { console.log(err);});
+  .then(() => {
+    console.log("Connected to MongoDB");
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 //view engine
 app.engine("ejs", ejsMate);
