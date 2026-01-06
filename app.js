@@ -6,6 +6,7 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync");
+const ExpressError = require("./utils/ExpressError");
 
 //momgodb
 const MONGO_URL = "mongodb://localhost:27017/StaySphere";
@@ -52,43 +53,54 @@ app.get("/listings/new", (req, res) => {
 });
 
 //show route
-app.get("/listings/:id", async (req, res) => {
-  let { id } = req.params;
-  const listing = await Listing.findById(id);
-  res.render("listings/show", { listing });
-});
+app.get(
+  "/listings/:id",
+  wrapAsync(async (req, res) => {
+    let { id } = req.params;
+    const listing = await Listing.findById(id);
+    res.render("listings/show", { listing });
+  })
+);
 
 //create route
-app.post("/listings", async (req, res) => {
-  try {
+app.post(
+  "/listings",
+  wrapAsync(async (req, res) => {
     const newListing = new Listing(req.body.listing);
     await newListing.save();
     res.redirect(`/listings`);
-  } catch (err) {
-    next(err);
-  }
-});
+  })
+);
 
 //edit route
-app.get("/listings/:id/edit", async (req, res) => {
-  let { id } = req.params;
-  const listing = await Listing.findById(id);
-  res.render("listings/edit", { listing });
-});
+app.get(
+  "/listings/:id/edit",
+  wrapAsync(async (req, res) => {
+    let { id } = req.params;
+    const listing = await Listing.findById(id);
+    res.render("listings/edit", { listing });
+  })
+);
 
 //update route
-app.put("/listings/:id", async (req, res) => {
-  let { id } = req.params;
-  await Listing.findByIdAndUpdate(id, req.body.listing);
-  res.redirect(`/listings/${id}`); // redirect to show page
-});
+app.put(
+  "/listings/:id",
+  wrapAsync(async (req, res) => {
+    let { id } = req.params;
+    await Listing.findByIdAndUpdate(id, req.body.listing);
+    res.redirect(`/listings/${id}`); // redirect to show page
+  })
+);
 
 //delete route
-app.delete("/listings/:id", async (req, res) => {
-  let { id } = req.params;
-  await Listing.findByIdAndDelete(id);
-  res.redirect("/listings");
-});
+app.delete(
+  "/listings/:id",
+  wrapAsync(async (req, res) => {
+    let { id } = req.params;
+    await Listing.findByIdAndDelete(id);
+    res.redirect("/listings");
+  })
+);
 
 // app.get("/testlistings", async (req, res) => {
 //   let samplelistings = new Listing({
@@ -104,8 +116,14 @@ app.delete("/listings/:id", async (req, res) => {
 //   res.send("Test listing created!");
 // });
 
+// for wrong route
+app.use((req, res, next) => {
+  next(new ExpressError(404, "Page Not Found"));
+});
+
 app.use((err, req, res, next) => {
-  res.send("Something went wrong!");
+  let { statusCode = 500, message = "Something went wrong" } = err;
+  res.status(statusCode).send(message);
 });
 
 app.listen(8080, () => {
