@@ -5,6 +5,7 @@ const Listing = require("./models/listing");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const wrapAsync = require("./utils/wrapAsync");
 
 //momgodb
 const MONGO_URL = "mongodb://localhost:27017/StaySphere";
@@ -59,9 +60,13 @@ app.get("/listings/:id", async (req, res) => {
 
 //create route
 app.post("/listings", async (req, res) => {
-  const newListing = new Listing(req.body.listing);
-  await newListing.save();
-  res.redirect(`/listings`);
+  try {
+    const newListing = new Listing(req.body.listing);
+    await newListing.save();
+    res.redirect(`/listings`);
+  } catch (err) {
+    next(err);
+  }
 });
 
 //edit route
@@ -98,6 +103,10 @@ app.delete("/listings/:id", async (req, res) => {
 //   await samplelistings.save();
 //   res.send("Test listing created!");
 // });
+
+app.use((err, req, res, next) => {
+  res.send("Something went wrong!");
+});
 
 app.listen(8080, () => {
   console.log("Server is running on port 8080");
