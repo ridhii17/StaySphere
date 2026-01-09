@@ -5,6 +5,7 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError");
+const session = require("express-session");
 
 const listings = require("./routes/listing");
 const review = require("./routes/review");
@@ -32,6 +33,13 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public"))); // serve static files css work
+
+const sessionOptions = {
+  secret: "mysupersecretcode!",
+  resave: false,
+  saveUninitialized: true,
+};
+app.use(session(sessionOptions));
 
 app.get("/", (req, res) => {
   res.send("Hello World!");
