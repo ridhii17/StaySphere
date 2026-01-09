@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema; // bar bar na likhna pve mongoose.schema
+const Review = require("./review");
 
 const listingSchema = new Schema({
   title: { type: String, required: true },
@@ -27,6 +28,12 @@ const listingSchema = new Schema({
       ref: "Review",
     },
   ],
+});
+
+listingSchema.post("findOneAndDelete", async (listing) => {
+  if (listing) {
+    await Review.deleteMany({ _id: { $in: listing.reviews } });
+  }
 });
 
 const Listing = mongoose.model("Listing", listingSchema);
