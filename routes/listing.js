@@ -37,6 +37,10 @@ router.get(
   wrapAsync(async (req, res) => {
     let { id } = req.params;
     const listing = await Listing.findById(id).populate("reviews");
+    if (!listing) {
+      req.flash("error", "Listing not found.");
+      res.redirect("/listings");
+    }
     res.render("listings/show", { listing });
   })
 );
@@ -59,6 +63,10 @@ router.get(
   wrapAsync(async (req, res) => {
     let { id } = req.params;
     const listing = await Listing.findById(id);
+    if (!listing) {
+      req.flash("error", "Listing not found.");
+      res.redirect("/listings");
+    }
     res.render("listings/edit", { listing });
   })
 );
@@ -70,7 +78,9 @@ router.put(
   wrapAsync(async (req, res) => {
     let { id } = req.params;
     await Listing.findByIdAndUpdate(id, req.body.listing);
+
     req.flash("success", "Listing updated!");
+
     res.redirect(`/listings/${id}`); // redirect to show page
   })
 );
