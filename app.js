@@ -71,18 +71,18 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/demouser", async (req, res) => {
-  let fakeuser = new User({
-    email: "a@b.com",
-    username: "demouser",
-  });
-  let registeredUser = await User.register(fakeuser, "helloworld");
-  res.send(registeredUser);
-});
+// app.get("/demouser", async (req, res) => {
+//   let fakeuser = new User({
+//     email: "a@b.com",
+//     username: "demouser",
+//   });
+//   let registeredUser = await User.register(fakeuser, "helloworld");
+//   res.send(registeredUser);
+// });
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
-app.use("/users", userRouter);
+app.use("/", userRouter);
 
 // for wrong route
 app.use((req, res, next) => {

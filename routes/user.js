@@ -3,97 +3,46 @@ const router = express.Router();
 const User = require("../models/user");
 const wrapAsync = require("../utils/wrapAsync");
 const passport = require("passport");
-const { saveRedirectUrl } = require("../middleware");
 
-const {
-  saveRedirectUrl,
-  isLoggedIn,
-  isProfileOwner,
-  validateUser,
-  varifyEmail,
-  varifyUserEmail,
-} = require("../middleware");
+//Signup Route
+router.get("/signup", (req, res) => {
+  res.render("users/signup");
+});
 
-const userController = require("../controllers/users");
-
-const multer = require("multer"); //install multer package in npm || multipart/form-data type receive and paras
-// const upload = multer({ dest: 'uploads/' })  //uploads folder me save karega
-const { storage } = require("../cloudConfig.js");
-const upload = multer({ storage });
-
-// Router.route
-router
-  .route("/signup")
-  .get(userController.renderSignupForm) //signup
-  .post(varifyEmail, validateUser, wrapAsync(userController.signUser));
+//Signup Route
+router.post(
+  "/signup",
+  wrapAsync(async (req, res) => {
+    try {
+      let { username, email, password } = req.body;
+      const newUser = new User({ username, email });
+      const registeredUser = await User.register(newUser, password);
+      req.flash("success", "Welcome to StaySphere!");
+      res.redirect("/listings");
+    } catch (err) {
+      console.log(err);
+      req.flash("error", err.message);
+      res.redirect("/signup");
+    }
+  })
+);
 
 //Login Route
-router
-  .route("/login")
-  .get(userController.renderLoginForm)
-  .post(
-    saveRedirectUrl,
-    passport.authenticate("local", {
-      failureRedirect: "/login",
-      failureFlash: true,
-    }),
-    wrapAsync(userController.loginUser)
-  );
-//passpost.authenticate -> middleware h || local Strategy failureRedirect -> login hone me problem aati h to "/login" me redirect hoge || or flash ho jayega
-
-//Logout
-router.get("/logout", userController.logoutUser);
-
-router.get("/", (req, res) => {
-  //redirect home page
-  res.redirect("/listings");
+router.get("/login", (req, res) => {
+  res.render("users/login");
 });
-router.get(
-  "/update-form/:id",
-  isLoggedIn,
-  isProfileOwner,
-  wrapAsync(userController.updateFormRender)
-); //update  form render
 
+//Login Route
 router.post(
-  "/update-password/:id",
-  isLoggedIn,
-  isProfileOwner,
-  wrapAsync(userController.updatePassword)
-); //update password
+  "/login",
+  passport.authenticate("local", {
+    failureRedirect: "/login", // redirect to login page
+    failureFlash: true, //when username or password is incorrect
+  }),
+  wrapAsync(async (req, res) => {
+    req.flash("success", "Welcome back!");
+    res.redirect("/listings");
+  })
+);
 
-router.post(
-  "/update-account/:id",
-  isLoggedIn,
-  isProfileOwner,
-  varifyUserEmail,
-  validateUser,
-  wrapAsync(userController.updateAccount)
-); //update account
-
-router.post(
-  "/update-image/:id",
-  isLoggedIn,
-  isProfileOwner,
-  upload.single("image"),
-  wrapAsync(userController.updateImage)
-); //update image
-
-router
-  .route("/change-image/:id")
-  .get(isLoggedIn, isProfileOwner, userController.renderImageChangeForm)
-  .post(
-    isLoggedIn,
-    isProfileOwner,
-    upload.single("image"),
-    wrapAsync(userController.updateImage)
-  ); //update image
-
-router.delete(
-  "/delete/:id",
-  isLoggedIn,
-  isProfileOwner,
-  wrapAsync(userController.deleteAccount)
-); //delete account
-
-module.exports = router; //export   app.js
+module.exports = router;
