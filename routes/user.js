@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const User = require("../models/user");
 const wrapAsync = require("../utils/wrapAsync");
 const passport = require("passport");
+const { saveRedirectUrl } = require("../middleware");
+
 const {
   saveRedirectUrl,
   isLoggedIn,
@@ -18,15 +21,16 @@ const multer = require("multer"); //install multer package in npm || multipart/f
 const { storage } = require("../cloudConfig.js");
 const upload = multer({ storage });
 
-// Router.route-----------------------
+// Router.route
 router
   .route("/signup")
-  .get(userController.renderSignupForm) //signup-----------
+  .get(userController.renderSignupForm) //signup
   .post(varifyEmail, validateUser, wrapAsync(userController.signUser));
 
+//Login Route
 router
   .route("/login")
-  .get(userController.renderLoginForm) //login----------
+  .get(userController.renderLoginForm)
   .post(
     saveRedirectUrl,
     passport.authenticate("local", {
@@ -37,10 +41,11 @@ router
   );
 //passpost.authenticate -> middleware h || local Strategy failureRedirect -> login hone me problem aati h to "/login" me redirect hoge || or flash ho jayega
 
-router.get("/logout", userController.logoutUser); //logout----------
+//Logout
+router.get("/logout", userController.logoutUser);
 
 router.get("/", (req, res) => {
-  //redirect home page---------
+  //redirect home page
   res.redirect("/listings");
 });
 router.get(
@@ -48,14 +53,14 @@ router.get(
   isLoggedIn,
   isProfileOwner,
   wrapAsync(userController.updateFormRender)
-); //update  form render------------
+); //update  form render
 
 router.post(
   "/update-password/:id",
   isLoggedIn,
   isProfileOwner,
   wrapAsync(userController.updatePassword)
-); //update password ------------
+); //update password
 
 router.post(
   "/update-account/:id",
@@ -64,7 +69,7 @@ router.post(
   varifyUserEmail,
   validateUser,
   wrapAsync(userController.updateAccount)
-); //update account------------
+); //update account
 
 router.post(
   "/update-image/:id",
@@ -72,7 +77,7 @@ router.post(
   isProfileOwner,
   upload.single("image"),
   wrapAsync(userController.updateImage)
-); //update image------------
+); //update image
 
 router
   .route("/change-image/:id")
@@ -82,13 +87,13 @@ router
     isProfileOwner,
     upload.single("image"),
     wrapAsync(userController.updateImage)
-  ); //update image------------
+  ); //update image
 
 router.delete(
   "/delete/:id",
   isLoggedIn,
   isProfileOwner,
   wrapAsync(userController.deleteAccount)
-); //delete account------------
+); //delete account
 
-module.exports = router; //export---app.js---------------
+module.exports = router; //export   app.js
