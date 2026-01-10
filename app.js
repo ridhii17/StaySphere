@@ -11,8 +11,9 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const User = require("./models/user");
 
-const listings = require("./routes/listing");
-const review = require("./routes/review");
+const listingRouter = require("./routes/listing");
+const reviewRouter = require("./routes/review.js");
+const userRouter = require("./routes/user");
 
 //MongoDB
 const MONGO_URL = "mongodb://localhost:27017/StaySphere";
@@ -74,12 +75,13 @@ app.get("/demouser", async (req, res) => {
     email: "a@b.com",
     username: "demouser",
   });
-  let registeredUser = await User.registeredUser(fakeuser, "helloworld");
+  let registeredUser = await User.register(fakeuser, "helloworld");
   res.send(registeredUser);
 });
 
-app.use("/listings", listings);
-app.use("/listings/:id/reviews", require("./routes/review"));
+app.use("/listings", listingRouter);
+app.use("/listings/:id/reviews", reviewRouter);
+app.use("/users", userRouter);
 
 // for wrong route
 app.use((req, res, next) => {
