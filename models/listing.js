@@ -16,7 +16,7 @@ const listingSchema = new Schema({
     url: {
       type: String,
       default:
-        "https://www.shutterstock.com/image-vector/default-ui-image-placeholder-wireframes-600nw-1037719192.jpg",
+        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8vjkIycG8WKgYLI_tkdqP9LxO5iAAX0yFWA&s",
     },
   },
   price: Number,
